@@ -87,6 +87,12 @@ return a list of all saved massings
 
 > The decisions you made under ambiguity, and what you consciously traded away.
 
+Considering that targets like GFA and FAR can be "infeasible", that means that they are lower limits.
+However the language being used is specifically "targets" which makes me think the algorithm needs to approach these lower limits as closely as possible.
+
+In similar vein, I assume site coverage ratio is both a high limit and a target for optimization on the setback parameter.
+
+
 ## Edge cases
 
 > How you handle concave plots, an inset that collapses to zero/splits, infeasible
