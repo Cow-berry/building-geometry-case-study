@@ -27,13 +27,21 @@ Constraint:
 max_height: float
 max_floor_count: int
 floor_height: float
-site_coverage_ratio: float`
-: `site_coverage_ratio` is within [0,1]
+site_coverage_ratio: float
+max_footprint_area: float | None
+gfa_target: float | None
+far_target: float | None`
+: `site_coverage_ratio` is within (0,1]
 
 MassingResult:
-`gross_footprint_area: float
-floor_count: int
-height: float`
+`
+foorprint_points: list[list[float]]
+footprint_area: float
+setback: float
+site_coverage_ratio
+gfa: float
+height: float
+floor_count: int`
 
 Massing:
 `polygon: SitePolygon
@@ -78,6 +86,12 @@ return a list of all saved massings
 ## Assumptions & trade-offs
 
 > The decisions you made under ambiguity, and what you consciously traded away.
+
+Considering that targets like GFA and FAR can be "infeasible", that means that they are lower limits.
+However the language being used is specifically "targets" which makes me think the algorithm needs to approach these lower limits as closely as possible.
+
+In similar vein, I assume site coverage ratio is both a high limit and a target for optimization on the setback parameter.
+
 
 ## Edge cases
 
