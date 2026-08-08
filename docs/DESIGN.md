@@ -27,13 +27,21 @@ Constraint:
 max_height: float
 max_floor_count: int
 floor_height: float
-site_coverage_ratio: float`
-: `site_coverage_ratio` is within [0,1]
+site_coverage_ratio: float
+max_footprint_area: float | None
+gfa_target: float | None
+far_target: float | None`
+: `site_coverage_ratio` is within (0,1]
 
 MassingResult:
-`gross_footprint_area: float
-floor_count: int
-height: float`
+`
+foorprint_points: list[list[float]]
+footprint_area: float
+setback: float
+site_coverage_ratio
+gfa: float
+height: float
+floor_count: int`
 
 Massing:
 `polygon: SitePolygon

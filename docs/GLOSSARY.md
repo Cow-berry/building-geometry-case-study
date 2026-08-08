@@ -12,5 +12,5 @@ Floor-to-floor height: the constant distance between two adjacent floors (implic
 Site Coverage Ratio: Footprint area / Site Polygon area
 
 ## Targets
-Gross Footprint Area: Foorprint area * floor count
-Floor Area Ratio: Gross Foorprint area / Site Polygon area
+Gross Footprint Area (GFA): Foorprint area * floor count
+Floor Area Ratio (GFA): Gross Foorprint area / Site Polygon area
