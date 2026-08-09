@@ -1,0 +1,54 @@
+from dataclasses import asdict
+
+from fastapi import APIRouter, Request
+from pydantic import BaseModel
+
+from app.db import Constraint as DBConstraint
+from app.db import Massing, ensure_db, get_connection
+from app.db import Massing as DBMassing
+from app.db import MassingResult as DBMassingResult
+from app.db import SitePolygon as DBSitePolygon
+from app.geometry.algorithm import calculate_massing
+from app.geometry.domain import Constraint, MassingResult, SitePolygon
+
+router = APIRouter(prefix="/massing", tags=["massing"])
+
+
+@router.get("/db/ensure")
+async def ensure_bd(request: Request) -> None:
+    async for conn in get_connection(request.app.state.db_pool):
+        return await ensure_db(conn)
+
+
+@router.get("/get/all")
+async def get_all(request: Request) -> list[dict]:
+    async for conn in get_connection(request.app.state.db_pool):
+        return await Massing.get_all(conn)
+    return []
+
+
+class CreateMassing(BaseModel):
+    points: list[list[float]]
+    constraint: dict
+    parent: int | None
+
+
+@router.post("/create/")
+async def create_massing(body: CreateMassing, request: Request) -> tuple[MassingResult | None, str]:
+    try:
+        polygon = SitePolygon(body.points)
+        constraint = Constraint(**body.constraint)
+        massing, err = calculate_massing(polygon, constraint)
+        if massing is None:
+            return None, err
+
+        async for conn in get_connection(request.app.state.db_pool):
+            db_polygon = await DBSitePolygon(-1, body.points).check_or_insert(conn)
+            db_constraint = await DBConstraint(-1, **body.constraint).check_or_insert(conn)
+            db_massing_result = await DBMassingResult(-1, **asdict(massing)).check_or_insert(conn)
+            _ = await DBMassing(-1, db_polygon, db_constraint, db_massing_result, body.parent).insert(conn)
+
+        return massing, ""
+
+    except Exception as e:
+        return None, f"Internal Error: {e}"
