@@ -198,8 +198,13 @@ class Massing(DBTable):
         async with conn.cursor(row_factory=dict_row) as cur:
             query: LiteralString = cast(
                 LiteralString,
+                # SELECT {Massing.table_name()}, {SitePolygon.table_name()}, {Constraint.table_name()}, {MassingResult.table_name()}
                 f"""
-SELECT {Massing.table_name()}, {SitePolygon.table_name()}, {Constraint.table_name()}, {MassingResult.table_name()}
+SELECT
+{Massing.table_name()}.id as id,
+row_to_json({SitePolygon.table_name()}) as polygon,
+row_to_json({Constraint.table_name()}) as constraint,
+row_to_json({MassingResult.table_name()}) as result
 FROM {Massing.table_name()}
 LEFT JOIN {SitePolygon.table_name()} ON {Massing.table_name()}.polygon_id = {SitePolygon.table_name()}.id
 LEFT JOIN {Constraint.table_name()} ON {Massing.table_name()}.constraint_id = {Constraint.table_name()}.id

@@ -28,7 +28,7 @@ export function MassingInput ({ onSubmit, setPoints, constraint, setConstraint, 
       {Object.keys(constraint).map(name =>
         <div className="form-row">
           <label className="form-label">{name}</label>
-          <input className="form-input" type="number" key={name} onChange={onChangeConstraint(name)}/>
+          <input className="form-input" type="number" step="any" key={name} onChange={onChangeConstraint(name)}/>
         </div>
       )}
       <button type="submit" className="form-row">Calculate Massing</button>

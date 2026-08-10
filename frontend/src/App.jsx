@@ -19,14 +19,24 @@ export default function App() {
   const [constraint, setConstraint] = useState(initConstraint);
   const [error, setError] = useState({...initConstraint, points: null, massing: null});
   const [points, setPoints] = useState([]);
+  const [allMassings, setAllMassings] = useState(null);
+  const [currentId, setCurrentId] = useState(null);
   
   const onSubmit = async (e) => {
     e.preventDefault();
     await ensureDB();
-    const massing = await createMassing(points, constraint, null);
+    const result = await createMassing(points, constraint, null);
 
-    const allMassings = await getAllMassings();
-    console.log("All massings: ", allMassings);
+    if (result[0] === null) {
+      setError({...error, massing: result[1]});
+      return;
+    }
+
+    const [massing, id] = result;
+
+    const allMassingsGot = await getAllMassings();
+    setAllMassings(Object.fromEntries(allMassingsGot.map(massing => [massing.id, massing])));
+    setCurrentId(id);
    };
 
   useEffect(() => {
@@ -57,7 +67,11 @@ export default function App() {
           color: "#666",
         }}
       >
-        <MassingVisualization/>
+        <MassingVisualization
+          points={points}
+          allMassings={allMassings}
+          currentId={currentId}
+        />
         {/* TODO(candidate): build the visualization here.
             Render the site polygon, the buildable footprint, the resulting massing,
             and the metrics. Let the user create options, branch them, and navigate
