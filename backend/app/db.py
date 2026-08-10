@@ -55,7 +55,7 @@ class DBTable:
 
     @classmethod
     def drop_table(cls) -> LiteralString:
-        return cast(LiteralString, f"DROP TABLE {cls.table_name()};")
+        return cast(LiteralString, f"DROP TABLE IF EXISTS {cls.table_name()} CASCADE;")
 
     def _get_data(self) -> dict:
         data = asdict(self)
@@ -199,26 +199,29 @@ class Massing(DBTable):
             query: LiteralString = cast(
                 LiteralString,
                 f"""
-            SELECT massing, polygon, constraints from {Massing.table_name()} massing
-            LEFT JOIN {SitePolygon.table_name()} polygon ON massing.polygon_id = polygon.id
-            LEFT JOIN {Constraint.table_name()} constraints ON massing.constraints_id = constraints.id
-            LEFT JOIN {MassingResult.table_name()} result ON massing.result_id = 
+SELECT {Massing.table_name()}, {SitePolygon.table_name()}, {Constraint.table_name()}, {MassingResult.table_name()}
+FROM {Massing.table_name()}
+LEFT JOIN {SitePolygon.table_name()} ON {Massing.table_name()}.polygon_id = {SitePolygon.table_name()}.id
+LEFT JOIN {Constraint.table_name()} ON {Massing.table_name()}.constraint_id = {Constraint.table_name()}.id
+LEFT JOIN {MassingResult.table_name()} ON {Massing.table_name()}.result_id = {MassingResult.table_name()}.id
             """,
             )
             await cur.execute(query)
             return await cur.fetchall()
 
 
-async def ensure_db(conn: AsyncConnection):
-    scripts = [cls.create_table() for cls in DBTable.__subclasses__()]
+async def purge_db(conn: AsyncConnection):
+    scripts = [cls.drop_table() for cls in DBTable.__subclasses__()]
     query: LiteralString = cast(LiteralString, "\n".join(scripts))
 
     async with conn.cursor(row_factory=dict_row) as cur:
         await cur.execute(query)
 
 
-async def purge_db(conn: AsyncConnection):
-    scripts: list[LiteralString] = [cls.drop_table() for cls in DBTable.__subclasses__()]
+async def ensure_db(conn: AsyncConnection):
+    # await purge_db(conn)
+    # await conn.commit()
+    scripts = [cls.create_table() for cls in DBTable.__subclasses__()]
     query: LiteralString = cast(LiteralString, "\n".join(scripts))
 
     async with conn.cursor(row_factory=dict_row) as cur:
