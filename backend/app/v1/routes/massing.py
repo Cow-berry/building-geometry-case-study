@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
 from app.db import Constraint as DBConstraint
-from app.db import Massing, ensure_db, get_connection
+from app.db import Massing, get_connection
 from app.db import Massing as DBMassing
 from app.db import MassingResult as DBMassingResult
 from app.db import SitePolygon as DBSitePolygon
@@ -12,12 +12,6 @@ from app.geometry.algorithm import calculate_massing
 from app.geometry.domain import Constraint, MassingResult, SitePolygon
 
 router = APIRouter(prefix="/massing", tags=["massing"])
-
-
-@router.get("/db/ensure")
-async def ensure_bd(request: Request) -> None:
-    async for conn in get_connection(request.app.state.db_pool):
-        return await ensure_db(conn)
 
 
 @router.get("/get/all")
