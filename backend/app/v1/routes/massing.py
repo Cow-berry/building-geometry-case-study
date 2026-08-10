@@ -27,7 +27,7 @@ class CreateMassing(BaseModel):
     parent: int | None
 
 
-@router.post("/create/")
+@router.post("/create")
 async def create_massing(body: CreateMassing, request: Request) -> tuple[MassingResult | None, str]:
     try:
         polygon = SitePolygon(body.points)
@@ -41,6 +41,7 @@ async def create_massing(body: CreateMassing, request: Request) -> tuple[Massing
             db_constraint = await DBConstraint(-1, **body.constraint).check_or_insert(conn)
             db_massing_result = await DBMassingResult(-1, **asdict(massing)).check_or_insert(conn)
             _ = await DBMassing(-1, db_polygon, db_constraint, db_massing_result, body.parent).insert(conn)
+            await conn.commit()
 
         return massing, ""
 
