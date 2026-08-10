@@ -109,10 +109,10 @@ function drawBuilding(canvasName, massing, rotation) {
 
 function getCurrentMassing(allMassings, currentId) {
   if (currentId === null || allMassings === null) return null;
-  allMassings = allMassings.filter((massing) => massing.id == currentId);
-  if (allMassings.length === 0) return null;
-  return allMassings[0];
+  return allMassings[currentId];
 }
+
+import "./MassingVisualization.css";
 
 export function MassingVisualization ({points, allMassings, currentId}) {
   const [rotation, setRotation] = useState(Math.PI);
@@ -135,9 +135,23 @@ export function MassingVisualization ({points, allMassings, currentId}) {
   
   return (
     <div className="canvas-row">
-      <canvas id ="polygon"> </canvas>
-      <canvas id ="building"> </canvas>
-      <input type="range" min={0} max={2*Math.PI} step="any" onChange={(e) => setRotation(e.target.value)} className="slider"/>
+      <div className="canvas-column">
+        <input type="range" min={0} max={2*Math.PI} step="any" onChange={(e) => setRotation(e.target.value)} className="slider"/>
+        <canvas id ="building" width="200" height="400"> </canvas>
+      </div>
+      <div className="canvas-column">
+        <canvas id ="polygon"> </canvas>
+        <table>
+          <tbody>
+          {currentId !== null && allMassings !== null && Object.entries(allMassings[currentId].result).map(([k, v], i) => k !== "footprint_points" &&
+            <tr>
+              <td>{k}</td>
+              <td>{v.toFixed(2)}</td>
+            </tr>
+          )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

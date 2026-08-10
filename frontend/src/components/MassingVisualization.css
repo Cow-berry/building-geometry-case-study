@@ -1,0 +1,22 @@
+.canvas-row {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.canvas-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 200px;
+}
+
+#building .input {
+    display: inline-block;
+    height: 400px;
+    width: 200px;
+}
+
+table tr td {
+    border: 1px solid;
+}
