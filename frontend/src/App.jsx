@@ -1,8 +1,33 @@
 import { useEffect, useState } from "react";
 import { getHealth } from "./api.js";
+import { MassingInput } from "./components/MassingInput.jsx";
+import { MassingVisualization } from "./components/MassingVisualization.jsx";
+import { createMassing, getAllMassings, ensureDB } from "./api.js";
 
 export default function App() {
+  const initConstraint = {
+    setback: null,
+    max_height: null,
+    max_floor_count: null,
+    floor_height: null,
+    site_coverage_ratio: null,
+    max_footprint_area: null,
+    gfa_target: null,
+    far_target: null};
+  
   const [health, setHealth] = useState("checking…");
+  const [constraint, setConstraint] = useState(initConstraint);
+  const [error, setError] = useState({...initConstraint, points: null, massing: null});
+  const [points, setPoints] = useState([]);
+  
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    await ensureDB();
+    const massing = await createMassing(points, constraint, null);
+
+    const allMassings = await getAllMassings();
+    console.log("All massings: ", allMassings);
+   };
 
   useEffect(() => {
     getHealth()
@@ -16,7 +41,13 @@ export default function App() {
       <p>
         Backend health: <strong>{health}</strong>
       </p>
-
+      <MassingInput
+        onSubmit={onSubmit}
+        setPoints={setPoints}
+        constraint={constraint}
+        setConstraint={setConstraint}
+        error={error}
+        setError={setError}/>
       <section
         style={{
           marginTop: "1.5rem",
@@ -26,6 +57,7 @@ export default function App() {
           color: "#666",
         }}
       >
+        <MassingVisualization/>
         {/* TODO(candidate): build the visualization here.
             Render the site polygon, the buildable footprint, the resulting massing,
             and the metrics. Let the user create options, branch them, and navigate
