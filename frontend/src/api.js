@@ -11,6 +11,10 @@ export async function ensureDB() {
   await fetch(`${API_BASE}/api/v1/db/ensure`);
 }
 
+export async function purgeDB() {
+  await fetch(`${API_BASE}/api/v1/db/purge`);
+}
+
 export async function createMassing(points, constraint, parent) {
   const payload = {points, constraint, parent};
   console.log("payload", payload);

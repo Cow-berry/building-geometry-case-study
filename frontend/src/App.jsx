@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getHealth } from "./api.js";
 import { MassingInput } from "./components/MassingInput.jsx";
 import { MassingVisualization } from "./components/MassingVisualization.jsx";
-import { createMassing, getAllMassings, ensureDB } from "./api.js";
+import { createMassing, getAllMassings, ensureDB, purgeDB } from "./api.js";
 
 export default function App() {
   const initConstraint = {
@@ -48,8 +48,11 @@ export default function App() {
       setCurrentId(id);
     } else {
       const entries = Object.entries(newAllMassings);
-      if (entries.length == 0) return;
-      setCurrentId(entries[entries.length - 1][0]);
+      if (entries.length == 0) {
+        setCurrentId(null);
+      } else {
+        setCurrentId(entries[entries.length - 1][0]);
+      }
     }
   };
   
@@ -65,7 +68,14 @@ export default function App() {
 
     const [massing, id] = result;
     await updateAllMassing(id);
-   };
+  };
+
+  const onPurgeDatabase = async (e) => {
+    // e.preventDefault();
+    if (!confirm("Do you want to delete all saved massings?")) return;
+    await purgeDB();
+    await updateAllMassing(null);
+  };
 
   useEffect(() => {
     getHealth()
@@ -106,6 +116,7 @@ export default function App() {
           setConstraint={setConstraint}
         />
       </section>
+      <form><button type="submit" onClick={onPurgeDatabase}>DELETE ALL DECISION</button></form>
     </main>
   );
 }

@@ -222,8 +222,6 @@ async def purge_db(conn: AsyncConnection):
 
 
 async def ensure_db(conn: AsyncConnection):
-    # await purge_db(conn)
-    # await conn.commit()
     scripts = [cls.create_table() for cls in DBTable.__subclasses__()]
     query: LiteralString = cast(LiteralString, "\n".join(scripts))
 

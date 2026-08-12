@@ -13,6 +13,7 @@ function getItem(object, indexPath, precision) {
 
 
 function getParents(object) {
+  if (object === null || object === undefined) return [];
   let parents = [object];
   while (object.parentMassing !== null) {
     parents.push(object.parentMassing);
@@ -70,7 +71,7 @@ function DecisionTable({decisions, canvasId, onRowClick, currentId, title}) {
 export function DecisionTree({ allMassings, currentId, setCurrentId, setPoints, setConstraint }) {
   const decisionSetup = [
     [() => getParents(allMassings[currentId]), "parents"],
-    [() => allMassings[currentId].children, "children"],
+    [() => currentId in allMassings ? allMassings[currentId].children : [], "children"],
   ];
   useEffect(() => {
     decisionSetup.map(([decisions, name]) => {
