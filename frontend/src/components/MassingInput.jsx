@@ -7,7 +7,7 @@ export function MassingInput ({ onSubmit, setPoints, constraint, setConstraint, 
     const pair = RegExp("\\s*\\[" + number.source + "," + number.source + "\\]\\s*");
     const coordRegex = RegExp("^" + "\\s*\\[" + pair.source + "(," + pair.source + ")*" +"\\]\\s*$", "g");
     if (!coordRegex.test(e.target.value)) {
-      setError({...error, points: "invalid input: check the formatting"});
+      setError({...error, points: "invalid input: should be a JSON array. Example: [[0, 0], [40, 0], [40, 15], [20, 15], [20, 30], [0, 30]]"});
       return;
     }
     setPoints(JSON.parse(e.target.value));
