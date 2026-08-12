@@ -17,7 +17,6 @@ export async function purgeDB() {
 
 export async function createMassing(points, constraint, parent) {
   const payload = {points, constraint, parent};
-  console.log("payload", payload);
   const res = await fetch(`${API_BASE}/api/v1/massing/create`, {
     method: "POST",
     headers: {
@@ -27,7 +26,6 @@ export async function createMassing(points, constraint, parent) {
     body: JSON.stringify(payload)
   });
   const res_json = await res.json();
-  console.log("res json", res_json);
   return res_json;
 }
 

@@ -92,10 +92,8 @@ class DBTable:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(query, [data[key] for key in data if data[key] is not None])
             row = await cur.fetchone()
-            print(f"\n{self.__class__.__name__} {row = }\n{query = }\n{data = }")
             if row is not None:
                 return row["id"]
-            print(f"{row = } IS NONE")
             return await self.insert(conn)
 
 

@@ -31,7 +31,6 @@ export default function App() {
       const parentId = massing["parentid"];
       massing["children"] = [];
       massing["parentMassing"] = parentId === null ? null : newAllMassings[parentId];
-      console.log(parentId, massing, newAllMassings);
     }
     for (const id in newAllMassings) {
       const massing = newAllMassings[id];
@@ -41,7 +40,6 @@ export default function App() {
       }
     }
 
-    console.log(newAllMassings);
     
     setAllMassings(newAllMassings);
     if (id !== null) {
