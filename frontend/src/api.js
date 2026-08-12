@@ -35,9 +35,3 @@ export async function getAllMassings() {
   const res = await fetch(`${API_BASE}/api/v1/massing/get/all`);
   return await res.json();
 }
-
-
-// TODO(candidate): add the calls for your massing / options API here, e.g.
-//   export async function createMassing(payload) { ... }
-//   export async function branchOption(id, payload) { ... }
-//   export async function listOptions() { ... }
