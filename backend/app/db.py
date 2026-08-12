@@ -55,7 +55,7 @@ class DBTable:
 
     @classmethod
     def drop_table(cls) -> LiteralString:
-        return cast(LiteralString, f"DROP TABLE IF EXISTS {cls.table_name()} CASCADE;")
+        return cast(LiteralString, f"TRUNCATE TABLE {cls.table_name()};")
 
     def _get_data(self) -> dict:
         data = asdict(self)
@@ -196,7 +196,6 @@ class Massing(DBTable):
         async with conn.cursor(row_factory=dict_row) as cur:
             query: LiteralString = cast(
                 LiteralString,
-                # SELECT {Massing.table_name()}, {SitePolygon.table_name()}, {Constraint.table_name()}, {MassingResult.table_name()}
                 f"""
 SELECT
 {Massing.table_name()}.id as id,
