@@ -22,13 +22,20 @@ export function MassingInput ({ onSubmit, setPoints, constraint, setConstraint, 
     <form onSubmit={onSubmit} className="form-column">
       <div className="form-row">
         <label className="form-label">Polygon points</label>
-        <input className="form-input" type="text" onChange={onChangePoints}/>
+        <input className="form-input" type="text" id="input-polygon" onChange={onChangePoints}/>
         <label className="form-error">{error["points"]}</label>
       </div>
       {Object.keys(constraint).map(name =>
         <div className="form-row">
           <label className="form-label">{name}</label>
-          <input className="form-input" type="number" step="any" key={name} onChange={onChangeConstraint(name)}/>
+          <input
+            className="form-input"
+            type="number"
+            step="any"
+            key={name}
+            onChange={onChangeConstraint(name)}
+            id={`input-${name}`}
+          />
         </div>
       )}
       <button type="submit" className="form-row">Calculate Massing</button>

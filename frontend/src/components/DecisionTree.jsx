@@ -78,6 +78,22 @@ export function DecisionTree({ allMassings, currentId, setCurrentId, setPoints, 
         drawFootprint(`${name}-${massing.id}`, massing.polygon.points, massing.result.footprint_points);
       });      
     }, []);
+
+    const massing = getCurrentMassing(allMassings, currentId);
+    if (massing === null) return;
+    
+    // Set the values for react state
+    setPoints(massing.polygon.points);
+    const {id: _, ...constraint} = massing.constraint;
+    setConstraint(constraint);
+    
+    // Visually set the values for the user
+    document.getElementById("input-polygon").value = JSON.stringify(massing.polygon.points);
+    Object.keys(massing.constraint).map((name) => {
+      if (name === "id") return;
+      document.getElementById(`input-${name}`).value = massing.constraint[name];
+    });
+    
   }, [allMassings, currentId]);
 
   const onRowClick = (id) => () => {
