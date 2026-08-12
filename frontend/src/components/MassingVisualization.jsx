@@ -4,15 +4,14 @@ import { drawFootprint, drawBuilding } from "./visualization.js";
 import { DecisionTree } from "./DecisionTree.jsx";
 
 
-
-function getCurrentMassing(allMassings, currentId) {
+export function getCurrentMassing(allMassings, currentId) {
   if (currentId === null || allMassings === null) return null;
   return allMassings[currentId];
 }
 
 import "./MassingVisualization.css";
 
-export function MassingVisualization ({points, allMassings, currentId}) {
+export function MassingVisualization ({ points, allMassings, currentId, setCurrentId, setPoints, constraint, setConstraint }) {
   const [rotation, setRotation] = useState(Math.PI);
 
   useEffect(() => {
@@ -23,12 +22,18 @@ export function MassingVisualization ({points, allMassings, currentId}) {
   }, [allMassings, currentId, rotation]);
   
   
+
   useEffect(() => {
-    drawFootprint("polygon", points, null);
+    let footprint = null;
+    const massing = getCurrentMassing(allMassings, currentId);
+    if (massing !== null && massing.polygon.points === points) {
+      const {id: _, ...massingConstraint} = massing.constraint;
+      if (Object.keys(massingConstraint).every((key) => massingConstraint[key] === constraint[key])) {
+        footprint = massing.result.footprint_points;
+      }
+    }
+    drawFootprint("polygon", points, footprint);
   }, [points]);
-
-  
-
   
   
   return (
