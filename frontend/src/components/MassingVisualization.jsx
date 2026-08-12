@@ -55,6 +55,12 @@ export function MassingVisualization ({ points, allMassings, currentId, setCurre
           </tbody>
         </table>
       </div>
+      <DecisionTree
+        allMassings={allMassings}
+        currentId={currentId}
+        setCurrentId={setCurrentId}
+        setPoints={setPoints}
+        setConstraint={setConstraint}/>
     </div>
   );
 }
