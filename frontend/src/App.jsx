@@ -25,7 +25,7 @@ export default function App() {
   const onSubmit = async (e) => {
     e.preventDefault();
     await ensureDB();
-    const result = await createMassing(points, constraint, null);
+    const result = await createMassing(points, constraint, currentId);
 
     if (result[0] === null) {
       setError({...error, massing: result[1]});
