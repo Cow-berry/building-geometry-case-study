@@ -178,8 +178,6 @@ class Massing(DBTable):
     result_id: int
     parent_id: int | None
 
-    ignore_check: ClassVar[list[str]] = ["id", "parent_id"]
-
     @override
     @classmethod
     def create_table(cls) -> str:
@@ -202,6 +200,7 @@ class Massing(DBTable):
                 f"""
 SELECT
 {Massing.table_name()}.id as id,
+{Massing.table_name()}.parent_id as parentid,
 row_to_json({SitePolygon.table_name()}) as polygon,
 row_to_json({Constraint.table_name()}) as constraint,
 row_to_json({MassingResult.table_name()}) as result
