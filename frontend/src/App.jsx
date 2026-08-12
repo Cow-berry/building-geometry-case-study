@@ -21,6 +21,37 @@ export default function App() {
   const [points, setPoints] = useState([]);
   const [allMassings, setAllMassings] = useState(null);
   const [currentId, setCurrentId] = useState(null);
+
+  const updateAllMassing = async (id) => {
+    let newAllMassings = await getAllMassings();
+    
+    newAllMassings = Object.fromEntries(newAllMassings.map(massing => [massing.id, massing]));
+    for (const id in newAllMassings) {
+      const massing = newAllMassings[id];
+      const parentId = massing["parentid"];
+      massing["children"] = [];
+      massing["parentMassing"] = parentId === null ? null : newAllMassings[parentId];
+      console.log(parentId, massing, newAllMassings);
+    }
+    for (const id in newAllMassings) {
+      const massing = newAllMassings[id];
+      const parent = massing["parentMassing"];
+      if (parent !== null) {
+        parent["children"].push(massing);
+      }
+    }
+
+    console.log(newAllMassings);
+    
+    setAllMassings(newAllMassings);
+    if (id !== null) {
+      setCurrentId(id);
+    } else {
+      const entries = Object.entries(newAllMassings);
+      if (entries.length == 0) return;
+      setCurrentId(entries[entries.length - 1][0]);
+    }
+  };
   
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -33,16 +64,14 @@ export default function App() {
     }
 
     const [massing, id] = result;
-
-    const allMassingsGot = await getAllMassings();
-    setAllMassings(Object.fromEntries(allMassingsGot.map(massing => [massing.id, massing])));
-    setCurrentId(id);
+    await updateAllMassing(id);
    };
 
   useEffect(() => {
     getHealth()
       .then((data) => setHealth(data.status))
       .catch((err) => setHealth(`unreachable (${err.message})`));
+    updateAllMassing(null);
   }, []);
 
   return (
@@ -71,13 +100,11 @@ export default function App() {
           points={points}
           allMassings={allMassings}
           currentId={currentId}
+          setCurrentId={setCurrentId}
+          setPoints={setPoints}
+          constraint={constraint}
+          setConstraint={setConstraint}
         />
-        {/* TODO(candidate): build the visualization here.
-            Render the site polygon, the buildable footprint, the resulting massing,
-            and the metrics. Let the user create options, branch them, and navigate
-            the decision tree. Pick whatever rendering approach you can justify
-            (2D canvas/SVG, 3D via three.js, …). Sample sites live in ../data/sites/. */}
-        Visualization goes here.
       </section>
     </main>
   );
