@@ -55,7 +55,7 @@ class DBTable:
 
     @classmethod
     def drop_table(cls) -> LiteralString:
-        return cast(LiteralString, f"DROP TABLE IF EXISTS {cls.table_name()} CASCADE;")
+        return cast(LiteralString, f"TRUNCATE TABLE {cls.table_name()};")
 
     def _get_data(self) -> dict:
         data = asdict(self)
@@ -92,10 +92,8 @@ class DBTable:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(query, [data[key] for key in data if data[key] is not None])
             row = await cur.fetchone()
-            print(f"\n{self.__class__.__name__} {row = }\n{query = }\n{data = }")
             if row is not None:
                 return row["id"]
-            print(f"{row = } IS NONE")
             return await self.insert(conn)
 
 
@@ -178,8 +176,6 @@ class Massing(DBTable):
     result_id: int
     parent_id: int | None
 
-    ignore_check: ClassVar[list[str]] = ["id", "parent_id"]
-
     @override
     @classmethod
     def create_table(cls) -> str:
@@ -198,10 +194,10 @@ class Massing(DBTable):
         async with conn.cursor(row_factory=dict_row) as cur:
             query: LiteralString = cast(
                 LiteralString,
-                # SELECT {Massing.table_name()}, {SitePolygon.table_name()}, {Constraint.table_name()}, {MassingResult.table_name()}
                 f"""
 SELECT
 {Massing.table_name()}.id as id,
+{Massing.table_name()}.parent_id as parentid,
 row_to_json({SitePolygon.table_name()}) as polygon,
 row_to_json({Constraint.table_name()}) as constraint,
 row_to_json({MassingResult.table_name()}) as result
@@ -224,8 +220,6 @@ async def purge_db(conn: AsyncConnection):
 
 
 async def ensure_db(conn: AsyncConnection):
-    # await purge_db(conn)
-    # await conn.commit()
     scripts = [cls.create_table() for cls in DBTable.__subclasses__()]
     query: LiteralString = cast(LiteralString, "\n".join(scripts))
 

@@ -5,9 +5,9 @@ export function MassingInput ({ onSubmit, setPoints, constraint, setConstraint, 
     setError({...error, points: ""});
     const number = /\s*[0-9]+(\.[0-9]+)?\s*/;
     const pair = RegExp("\\s*\\[" + number.source + "," + number.source + "\\]\\s*");
-    const coordRegex = RegExp("^" + "\s*\\[" + pair.source + "(," + pair.source + ")*" +"\\]\\s*$", "g");
+    const coordRegex = RegExp("^" + "\\s*\\[" + pair.source + "(," + pair.source + ")*" +"\\]\\s*$", "g");
     if (!coordRegex.test(e.target.value)) {
-      setError({...error, points: "invalid input: check the formatting"});
+      setError({...error, points: "invalid input: should be a JSON array. Example: [[0, 0], [40, 0], [40, 15], [20, 15], [20, 30], [0, 30]]"});
       return;
     }
     setPoints(JSON.parse(e.target.value));
@@ -22,13 +22,20 @@ export function MassingInput ({ onSubmit, setPoints, constraint, setConstraint, 
     <form onSubmit={onSubmit} className="form-column">
       <div className="form-row">
         <label className="form-label">Polygon points</label>
-        <input className="form-input" type="text" onChange={onChangePoints}/>
+        <input className="form-input" type="text" id="input-polygon" onChange={onChangePoints}/>
         <label className="form-error">{error["points"]}</label>
       </div>
       {Object.keys(constraint).map(name =>
         <div className="form-row">
           <label className="form-label">{name}</label>
-          <input className="form-input" type="number" step="any" key={name} onChange={onChangeConstraint(name)}/>
+          <input
+            className="form-input"
+            type="number"
+            step="any"
+            key={name}
+            onChange={onChangeConstraint(name)}
+            id={`input-${name}`}
+          />
         </div>
       )}
       <button type="submit" className="form-row">Calculate Massing</button>

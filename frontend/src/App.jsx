@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getHealth } from "./api.js";
 import { MassingInput } from "./components/MassingInput.jsx";
 import { MassingVisualization } from "./components/MassingVisualization.jsx";
-import { createMassing, getAllMassings, ensureDB } from "./api.js";
+import { createMassing, getAllMassings, ensureDB, purgeDB } from "./api.js";
 
 export default function App() {
   const initConstraint = {
@@ -21,11 +21,43 @@ export default function App() {
   const [points, setPoints] = useState([]);
   const [allMassings, setAllMassings] = useState(null);
   const [currentId, setCurrentId] = useState(null);
+
+  const updateAllMassing = async (id) => {
+    let newAllMassings = await getAllMassings();
+    
+    newAllMassings = Object.fromEntries(newAllMassings.map(massing => [massing.id, massing]));
+    for (const id in newAllMassings) {
+      const massing = newAllMassings[id];
+      const parentId = massing["parentid"];
+      massing["children"] = [];
+      massing["parentMassing"] = parentId === null ? null : newAllMassings[parentId];
+    }
+    for (const id in newAllMassings) {
+      const massing = newAllMassings[id];
+      const parent = massing["parentMassing"];
+      if (parent !== null) {
+        parent["children"].push(massing);
+      }
+    }
+
+    
+    setAllMassings(newAllMassings);
+    if (id !== null) {
+      setCurrentId(id);
+    } else {
+      const entries = Object.entries(newAllMassings);
+      if (entries.length == 0) {
+        setCurrentId(null);
+      } else {
+        setCurrentId(entries[entries.length - 1][0]);
+      }
+    }
+  };
   
   const onSubmit = async (e) => {
     e.preventDefault();
     await ensureDB();
-    const result = await createMassing(points, constraint, null);
+    const result = await createMassing(points, constraint, currentId);
 
     if (result[0] === null) {
       setError({...error, massing: result[1]});
@@ -33,16 +65,21 @@ export default function App() {
     }
 
     const [massing, id] = result;
+    await updateAllMassing(id);
+  };
 
-    const allMassingsGot = await getAllMassings();
-    setAllMassings(Object.fromEntries(allMassingsGot.map(massing => [massing.id, massing])));
-    setCurrentId(id);
-   };
+  const onPurgeDatabase = async (e) => {
+    // e.preventDefault();
+    if (!confirm("Do you want to delete all saved massings?")) return;
+    await purgeDB();
+    await updateAllMassing(null);
+  };
 
   useEffect(() => {
     getHealth()
       .then((data) => setHealth(data.status))
       .catch((err) => setHealth(`unreachable (${err.message})`));
+    updateAllMassing(null);
   }, []);
 
   return (
@@ -71,14 +108,13 @@ export default function App() {
           points={points}
           allMassings={allMassings}
           currentId={currentId}
+          setCurrentId={setCurrentId}
+          setPoints={setPoints}
+          constraint={constraint}
+          setConstraint={setConstraint}
         />
-        {/* TODO(candidate): build the visualization here.
-            Render the site polygon, the buildable footprint, the resulting massing,
-            and the metrics. Let the user create options, branch them, and navigate
-            the decision tree. Pick whatever rendering approach you can justify
-            (2D canvas/SVG, 3D via three.js, …). Sample sites live in ../data/sites/. */}
-        Visualization goes here.
       </section>
+      <form><button type="submit" onClick={onPurgeDatabase}>DELETE ALL DECISION</button></form>
     </main>
   );
 }

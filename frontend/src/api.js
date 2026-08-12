@@ -11,9 +11,12 @@ export async function ensureDB() {
   await fetch(`${API_BASE}/api/v1/db/ensure`);
 }
 
+export async function purgeDB() {
+  await fetch(`${API_BASE}/api/v1/db/purge`);
+}
+
 export async function createMassing(points, constraint, parent) {
   const payload = {points, constraint, parent};
-  console.log("payload", payload);
   const res = await fetch(`${API_BASE}/api/v1/massing/create`, {
     method: "POST",
     headers: {
@@ -23,7 +26,6 @@ export async function createMassing(points, constraint, parent) {
     body: JSON.stringify(payload)
   });
   const res_json = await res.json();
-  console.log("res json", res_json);
   return res_json;
 }
 
@@ -31,9 +33,3 @@ export async function getAllMassings() {
   const res = await fetch(`${API_BASE}/api/v1/massing/get/all`);
   return await res.json();
 }
-
-
-// TODO(candidate): add the calls for your massing / options API here, e.g.
-//   export async function createMassing(payload) { ... }
-//   export async function branchOption(id, payload) { ... }
-//   export async function listOptions() { ... }

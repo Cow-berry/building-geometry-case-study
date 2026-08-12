@@ -1,0 +1,23 @@
+tbody tr:hover {
+    background-color: #89CFF0;
+    cursor: pointer;
+}
+
+.current {
+    background-color: #FFDE21;
+}
+
+tbody tr td {
+    text-align: right;
+    margin-right: 100px;
+}
+
+.title {
+    text-align: left;
+    font-size: 18pt;
+}
+
+.table-canvas {
+    width: 25px;
+    height: 25px;
+}

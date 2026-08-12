@@ -51,6 +51,7 @@ def optimize_setback(site_polygon: SitePolygon, constraint: Constraint) -> tuple
         else:
             b = setback
 
+    # specifically `b` because setback at `a` does not satisfy the constraint (i.e. we prefer cutting more then less)
     result_setback = b
     rounded = round(result_setback, 3)
     if rounded >= a:
