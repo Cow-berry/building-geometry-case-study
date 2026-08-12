@@ -6,60 +6,70 @@ Constraints can be either limits above or below, but generally the goal is to fi
 
 ## Domain model
 SitePolygon:
-`points: list[list[int]]
+
+<code>points: list[list[int]]
 : must be list of pairs of integers
 : must have at least three points
-: must be a valid non-intersecting polygon`
+: must be a valid non-intersecting polygon
+</code>
 
 Constraint:
-`setback: float
+
+<code>setback: float
 max_height: float
 max_floor_count: int
 floor_height: float
 site_coverage_ratio: float
 max_footprint_area: float | None
 gfa_target: float | None
-far_target: float | None`
+far_target: float | None
 : `site_coverage_ratio` is within (0,1]
+</code>
 
 MassingResult:
-`
-foorprint_points: list[list[float]]
+
+<code>foorprint_points: list[list[float]]
 footprint_area: float
 setback: float
 site_coverage_ratio
 gfa: float
 height: float
 floor_count: int`
+</code>
 
 Massing:
-`polygon: SitePolygon [by id]
+
+<code>polygon: SitePolygon [by id]
 constraint: Constraint [by id]
 result: MassingResult [by id]
-parent: Massing | None [by id]`
+parent: Massing | None [by id]
+</code>
 
 
 ## Algorithm
 
-- For inset calculation `shapely` library is used. For specific math problem like this it's a good practice to use an already existing mature library that already dealt with all the edge cases of degenerate polygons and reflex corners. This specific one can even give specific feedback to user about the problem with their polygon.
+- For inset calculation `shapely` library is used. For specific math problem like this it's a good practice to use an already existing mature library that already dealt with all the edge cases of degenerate polygons and reflex corners. This specific one can even give text feedback to user about the problem with their polygon.
 
-- Achieving `site_coverage_ratio` is an optimization problem of finding specific value of a monotone function (footprint area is a monotone function of the setback), which can easily be solved with a binary search. For binary search have the low limit on setback at the `setback` parameter provided by user. For higher limit we take the diameter of the polygon, then binary search from there down to find the limit where the area becomes non-zero. And finally from there we can safely.
+- Achieving `site_coverage_ratio` is an optimization problem of finding specific value of a monotone function (footprint area is a monotone function of the setback), which can easily be solved with a binary search. For the binary search we need two limits. Low limit on setback is at the `setback` parameter provided by user. For higher limit we take the diameter of the polygon, then binary search from there down to find the limit where the area becomes non-zero. And finally from there we can safely.
 - For floor count there is an implicit hard limit on the number of floors set by `max_height` and `floor_to_floor_height`, so we have first cap it by that number.
 - Since in real life context we can always assume the maximum number of floors is a small reasonable number, at this point we can just calculate the metrics for each floor count separately and work further with a list of options.
 - Finally we have a `min_gross_footprint_area` to consider. It is either directly set by the `gross_footprint_area_target` or less directly by `floor_area_ratio_target` that still relates the same metrics. We can filter our options by purging anything that doesn't meet this minimum GFA. Finally we take the remaining option with the smallest GFA that fits the set limit.
 
 ## API contract
 
-`/db/ensure` -> void:
-Initialises the database if it hasn't already been done
+`/db/ensure -> void`:
+- Initialises the database if it hasn't already been done
 
-`massing/create/{body: points constraints parent}` -> {ok, massing_result}:
-calculates a massing given the site polygon and constraints
-on success of the massing algorithm, adds the massing parameters to the database, optionally setting the parent
-returns the result of the massing algorithm
+`/db/purge -> void`:
+- Deletes all the data while preserving the tables
 
-`massing/get/all` -> [{points, constraints, massing_result}]:
-return a list of all saved massings
+`massing/create/{body: points constraints parent} -> {ok, massing_result}`:
+- calculates a massing given the site polygon and constraints
+- on success of the massing algorithm, adds the massing parameters to the database, optionally setting the parent
+- returns the result of the massing algorithm
+
+`massing/get/all -> [{id, parent_id, polygon, constraints, result}]`:
+- return a list of all saved massings
 
 
 ## Visualization
@@ -67,13 +77,15 @@ return a list of all saved massings
 First the Site Polygon is shown. The footprint is added to the same canvas when the massing is computed. 
 It is shown to allow the architect user to visually confirm the site polygon is entered correctly, and to see the size and shape of the footprint compared to the site polygon, all from the bird eye's view.
 
-The isometric projection of the 3d model of the building is shown on a separate canvas. The architext user needs some way to see the resulting 3d shape of the building. Isometric projection is specifically chosen because it involves the least amount of computation and is easier to implement.
+The isometric projection of the 3d model of the building is shown on a separate canvas. The architecht user needs some way to see the resulting 3d shape of the building. Isometric projection is specifically chosen because it involves the least amount of computation and is easier to implement.
 
 Finally a interface is shown to navigate the decision tree.
 The user gets two tables:
 - One is for the current massing and its parents, and its parent's parent and so on.
 - The other table is to show direct children of the current massing.
+
 Clicking on any row allows the user to switch to that massing, and tweak parameters from there.
+
 Aside from massing result and the number of children, each shows a small representation of the site polygon and the footprint, for easier navigation.
 
 ## Assumptions & trade-offs
@@ -84,15 +96,17 @@ However the language being used is specifically "targets" which makes me think t
 
 In similar vein, I assume site coverage ratio is both a high limit and a target for optimization on the setback parameter.
 
+Moreover I'm making a big assumption that we should maximize footprint area before anything else. Which might not be the case as it trades off the ability to get closer to GFA target by varying several parameters.
+
 ### Decision Tree
 
-I suppose even you repeat a position through a series of changes, you still want to get a new node in the decision tree. Jumping between nodes would potentially disrupt the flow.
+I suppose that even if you repeat a position through a series of changes, you still want to get a new node in the decision tree. Jumping between nodes would potentially disrupt the flow.
 
 ## Edge cases
-- Concave plots don't pose any additional problems, thank to `shapely` library taking careof insets in this case
+- Concave plots don't pose any additional problems, thanks to `shapely` library taking careof insets in this case
 - Inset that collapses to zero/splits is reported as such back to user as an error
-- Infeasible constrain sets are detected early and reported in verbose manner
-- Self intersection are detected by the `shapely` library and reported as such
+- Infeasible constrain sets are detected early and reported in a verbose manner
+- Self intersections are detected by the `shapely` library and reported as such
 - Unreachable GFA target is detected at the final step and reported as such
 
 ## What I'd do next
