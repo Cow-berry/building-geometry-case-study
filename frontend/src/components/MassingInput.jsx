@@ -5,7 +5,7 @@ export function MassingInput ({ onSubmit, setPoints, constraint, setConstraint, 
     setError({...error, points: ""});
     const number = /\s*[0-9]+(\.[0-9]+)?\s*/;
     const pair = RegExp("\\s*\\[" + number.source + "," + number.source + "\\]\\s*");
-    const coordRegex = RegExp("^" + "\s*\\[" + pair.source + "(," + pair.source + ")*" +"\\]\\s*$", "g");
+    const coordRegex = RegExp("^" + "\\s*\\[" + pair.source + "(," + pair.source + ")*" +"\\]\\s*$", "g");
     if (!coordRegex.test(e.target.value)) {
       setError({...error, points: "invalid input: check the formatting"});
       return;
