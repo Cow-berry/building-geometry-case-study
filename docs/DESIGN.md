@@ -96,5 +96,17 @@ I suppose even you repeat a position through a series of changes, you still want
 - Unreachable GFA target is detected at the final step and reported as such
 
 ## What I'd do next
+Critical:
+- Proper page design and layout
+- User registration, should the system be hosted to many users from a single server
+- Tab system to allow planning and switching between different projects
 
-> With another week: what you'd build, in what order, and why.
+Better UX:
+- Reodering and reshaping the tables based on the user feeback and what feels natural to tem
+- Different 3D views if isometric does not meet the industry standart for massing
+- Polygon input as a collapsible list of pairs of inputs if needed
+- Ability to drag points around if needed
+- Tree view of all decision nodes in a full tree digram
+- Deleting subtrees if they are no longer needed
+- Bookmarking certain decision nodes to get back to them
+- Tweaking many massings from a single node without fully switching to the new ones, to quickly compare different directions in the table of children 
